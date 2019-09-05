@@ -11,8 +11,8 @@ class Backyard extends Component {
 
   Backyard(this.game) {
     bgSprite = Sprite(Images.backyardBackground);
-    bgRect = Rect.fromLTWH(0, game.screenSize.height - (game.tileSize * 23),
-        game.tileSize * 9, game.tileSize * 23);
+    bgRect = Rect.fromLTWH(0, game.screenSize.height - (LangawGame.tileSize * 23),
+        LangawGame.tileSize * 9, LangawGame.tileSize * 23);
   }
 
   @override

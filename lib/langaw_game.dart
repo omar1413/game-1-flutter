@@ -1,23 +1,28 @@
 import 'dart:ui';
 import 'package:flame/game.dart';
-import 'components/fly.dart';
+import 'package:magarra/views/base_view.dart';
+import 'package:magarra/views/credits_view.dart';
+import 'package:magarra/views/help_view.dart';
+import 'package:magarra/views/home_view.dart';
 import 'package:flame/flame.dart';
 import 'dart:math';
 import 'package:flutter/gestures.dart';
+import 'package:magarra/views/lose_view.dart';
+import 'package:magarra/views/palying_view.dart';
 import './components/backyard.dart';
-import './components/house_fly.dart';
-import './components/agile_fly.dart';
-import './components/drooler_fly.dart';
-import './components/hungry_fly.dart';
-import './components/macho_fly.dart';
-import 'package:synchronized/synchronized.dart';
+
 
 class LangawGame extends Game {
   Size screenSize;
-  double tileSize = 0;
-  List<Fly> flies = [];
+  static double _tileSize = 0;
+
+
   Backyard backyardBackground;
-  var lock = Lock();
+
+
+  View gameView;
+
+
 
   final Random rnd = Random();
 
@@ -25,93 +30,39 @@ class LangawGame extends Game {
     init();
   }
 
+  static get tileSize => _tileSize;
+
   void onTapDown(TapDownDetails d) {
-    lock.synchronized(() {
-      flies.forEach((fly) {
-        if (fly.isTapped(d.globalPosition)) {
-          fly.onTapDown();
-        }
-      });
-    });
+      gameView.onTapDown(d);
+
   }
 
-  bool isFlyTriggered(double x, double y) {
-    bool triggered = false;
-    flies.forEach((fly) {
-      if (Fly.isTriggered(x, y, fly)) {
-        triggered = true;
-      }
-    });
 
-    return triggered;
-  }
-
-  void spawnFly() {
-    lock.synchronized(() {
-      // 2.025 our biggest fly is now 2.025x tile size
-      double x = rnd.nextDouble() * (screenSize.width - (tileSize * 2.025));
-      double y = rnd.nextDouble() * (screenSize.height - (tileSize * 2.025));
-
-//      bool triggered = isFlyTriggered(x, y);
-      bool triggered = false;
-
-      if (!triggered) {
-        flies.add(createRandomFly(x, y));
-      }
-    });
-  }
-
-  Fly createRandomFly(double x, double y) {
-    Fly fly = HouseFly(game: this, x: x, y: y);
-    switch (rnd.nextInt(5)) {
-      case 0:
-        fly = HouseFly(game: this, x: x, y: y);
-        break;
-      case 1:
-        fly = DroolerFly(game: this, x: x, y: y);
-        break;
-      case 2:
-        fly = AgileFly(game: this, x: x, y: y);
-        break;
-      case 3:
-        fly = MachoFly(game: this, x: x, y: y);
-        break;
-      case 4:
-        fly = HungryFly(game: this, x: x, y: y);
-        break;
-    }
-
-    return fly;
-  }
 
   void init() async {
     resize(await Flame.util.initialDimensions());
     spawnBackground();
-    spawnFly();
-    spawnFly();
-    spawnFly();
-    spawnFly();
-    spawnFly();
-    spawnFly();
+    gameView = HomeView(this);
   }
 
   @override
   void render(Canvas canvas) {
     renderBackground(canvas);
-    flies.forEach((fly) => fly.render(canvas));
+    gameView.render(canvas);
+
   }
 
   @override
   void update(double t) {
-    flies.forEach((fly) => fly.update(t));
-
-    flies.removeWhere((fly) => fly.offScreen);
+    gameView.update(t);
   }
+
+
 
   @override
   void resize(Size size) {
     screenSize = size;
-    tileSize = screenSize.width / 9;
+    _tileSize = screenSize.width / 9;
   }
 
   void renderBackground(Canvas canvas) {
@@ -121,4 +72,27 @@ class LangawGame extends Game {
   void spawnBackground() {
     backyardBackground = Backyard(this);
   }
+
+  void play(){
+    gameView = PlayingView(this);
+  }
+
+  void lose(){
+    gameView = LoseView(this);
+  }
+
+  void home(){
+    gameView = HomeView(this);
+  }
+
+  void creditsView(){
+    gameView = CreditsView(this);
+  }
+
+  void helpView(){
+    gameView = HelpView(this);
+  }
+
+
+
 }
